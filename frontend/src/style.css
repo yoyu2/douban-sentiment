@@ -1,0 +1,73 @@
+/* ===== Design Tokens ===== */
+:root {
+  --text: #374151;
+  --text-h: #111827;
+  --text-muted: #9ca3af;
+  --bg: #ffffff;
+  --bg-card: #ffffff;
+  --border: #e5e7eb;
+
+  --accent: #6366f1;
+  --accent-light: #a5b4fc;
+  --accent-bg: rgba(99, 102, 241, 0.06);
+
+  --shadow-sm: 0 1px 2px rgba(0, 0, 0, 0.04);
+  --shadow:   0 1px 3px rgba(0, 0, 0, 0.06), 0 1px 2px rgba(0, 0, 0, 0.04);
+  --shadow-lg: 0 4px 12px rgba(0, 0, 0, 0.08);
+
+  --sans:   system-ui, -apple-system, "Segoe UI", Roboto, sans-serif;
+  --mono:   ui-monospace, Consolas, monospace;
+
+  font: 16px/1.6 var(--sans);
+  color: var(--text);
+  background: var(--bg);
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+}
+
+@media (prefers-color-scheme: dark) {
+  :root {
+    --text: #d1d5db;
+    --text-h: #f9fafb;
+    --text-muted: #6b7280;
+    --bg: #111827;
+    --bg-card: #1f2937;
+    --border: #374151;
+    --accent-light: #6366f1;
+    --accent-bg: rgba(99, 102, 241, 0.12);
+    --shadow-sm: 0 1px 2px rgba(0, 0, 0, 0.3);
+    --shadow:   0 1px 3px rgba(0, 0, 0, 0.4);
+    --shadow-lg: 0 4px 16px rgba(0, 0, 0, 0.5);
+  }
+}
+
+/* ===== Reset ===== */
+*,
+*::before,
+*::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+body { margin: 0; background: var(--bg); }
+
+h1, h2, h3 { color: var(--text-h); }
+
+h1 {
+  font-size: 1.75rem;
+  font-weight: 700;
+  letter-spacing: -0.02em;
+}
+
+h2 {
+  font-size: 1.2rem;
+  font-weight: 600;
+  margin-bottom: 16px;
+}
+
+p { margin: 0; color: var(--text); }
+
+/* ===== Layout ===== */
+#app {
+  max-width: 1120px;
+  margin: 0 auto;
+  padding: 32px 24px 80px;
+  min-height: 100vh;
+}

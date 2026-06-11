@@ -9,7 +9,7 @@ if _project_root not in sys.path:
 
 from sanic import Sanic
 from sanic_cors import CORS
-from sanic.response import json as json_response
+from sanic.response import json as json_response, file as file_response
 from crawler.storage import (
     load_json,
     save_cleaned,
@@ -19,6 +19,7 @@ from crawler.storage import (
     save_rating_distribution,
     save_summary,
 )
+from crawler.movie_meta import load_movie_meta
 
 app = Sanic("douban-sentiment")
 CORS(app)
@@ -31,13 +32,31 @@ async def health(request):
     return json_response({"msg": "server is running"})
 
 
+@app.get("/api/posters/<movie_name>")
+async def get_poster(request, movie_name):
+    """返回本地缓存的影片海报图片"""
+    movie_name = unquote(movie_name)
+    poster_path = os.path.join(
+        os.path.dirname(__file__), "..", "data", "posters",
+        f"{movie_name}.jpg"
+    )
+    if os.path.exists(poster_path):
+        return await file_response(poster_path)
+    return json_response({"error": "poster not found"}, status=404)
+
+
 @app.get("/api/movies")
 async def list_movies(request):
-    """列出所有已分析的影片"""
+    """列出所有已分析的影片，含海报信息"""
     stats_dir = os.path.join(DATA_DIR, "statistics")
     movies = []
     if os.path.exists(stats_dir):
-        movies = sorted(os.listdir(stats_dir))
+        for name in sorted(os.listdir(stats_dir)):
+            meta = load_movie_meta(name)
+            movies.append({
+                "name": name,
+                "poster": f"/api/posters/{name}" if meta and meta.get("poster_url") else None,
+            })
     return json_response({"movies": movies})
 
 
@@ -76,6 +95,11 @@ async def get_statistics(request, movie_name):
             {"error": "movie not found"},
             status=404
         )
+
+    # 附加海报信息
+    meta = load_movie_meta(movie_name)
+    if meta and meta.get("poster_url"):
+        result["poster"] = f"/api/posters/{movie_name}"
 
     return json_response(result)
 @app.get("/api/movies/<movie_name>/comments")

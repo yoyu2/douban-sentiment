@@ -15,8 +15,6 @@ def fetch_page(url):
             timeout=10
         )
 
-        print("请求状态:", response.status_code)
-
         if response.status_code == 200:
             return response.text
 

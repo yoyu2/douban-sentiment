@@ -1,4 +1,9 @@
+import os
+import sys
 import time
+
+# 确保可以 import backend 下的模块
+sys.path.insert(0, os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
 
 from config import (
     MAX_PAGES,
@@ -17,13 +22,14 @@ from storage import (
     save_rating_distribution,
     save_summary
 )
-from sentiment import analyze_comments
+from backend.llm_service import analyze_sentiment
 from movie_stats import (
     generate_sentiment_statistics,
     generate_rating_distribution,
     generate_keywords,
     generate_summary
 )
+from movie_meta import fetch_and_save_poster
 
 
 def build_url(movie_id, start):
@@ -39,19 +45,18 @@ def crawl(movie_name, movie_id, comment_type="latest"):
     all_comments = []
     all_analyzed = []
 
+    failed_pages = 0
+
     for page in range(MAX_PAGES):
 
         start = page * PAGE_SIZE
 
         url = build_url(movie_id, start)
 
-        print("=" * 50)
-        print(f"正在爬取: {url}")
-
         html = fetch_page(url)
 
         if not html:
-            print("页面获取失败")
+            failed_pages += 1
             continue
 
         raw_comments = parse_comments(html)
@@ -63,14 +68,20 @@ def crawl(movie_name, movie_id, comment_type="latest"):
             comments=comments
         )
 
-        analyzed_comments = analyze_comments(comments)
+        # 使用大模型进行情感分析
+        analyzed_comments = []
+        for comment in comments:
+            sentiment_result = analyze_sentiment(comment["content"])
+            analyzed_comments.append({
+                **comment,
+                "sentiment": sentiment_result
+            })
+
         save_analysis(
             movie_name=movie_name,
             comment_type=comment_type,
             analysis_data=analyzed_comments
         )
-
-        print(f"当前页获取 {len(comments)} 条评论")
 
         all_comments.extend(comments)
         all_analyzed.extend(analyzed_comments)
@@ -78,8 +89,10 @@ def crawl(movie_name, movie_id, comment_type="latest"):
         # 防止请求太快
         time.sleep(2)
 
-    print("=" * 50)
-    print(f"总共获取 {len(all_comments)} 条评论")
+    print(f"爬取完成：{len(all_comments)} 条评论（{MAX_PAGES} 页，{failed_pages} 页失败）")
+
+    # 获取并保存影片海报
+    fetch_and_save_poster(movie_name, movie_id)
 
     return all_comments, all_analyzed
 
@@ -103,10 +116,6 @@ def main():
     comment_type = input("评论类型 (hot / latest, 默认 latest): ").strip()
     if comment_type not in ("hot", "latest"):
         comment_type = "latest"
-
-    print()
-    print(f"开始爬取: {movie_name} (ID={movie_id}, {comment_type})")
-    print()
 
     comments, analyzed = crawl(movie_name, movie_id, comment_type)
 

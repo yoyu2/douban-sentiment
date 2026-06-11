@@ -1,6 +1,5 @@
 from bs4 import BeautifulSoup
 
-
 def parse_comments(html):
     soup = BeautifulSoup(html, "html.parser")
 

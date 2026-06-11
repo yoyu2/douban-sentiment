@@ -1,10 +1,7 @@
 <template>
   <div class="wordcloud-card">
-    <v-chart
-      class="chart"
-      :option="option"
-      autoresize
-    />
+    <h3 class="chart-title">词云图</h3>
+    <v-chart class="chart" :option="option" autoresize />
   </div>
 </template>
 
@@ -18,97 +15,52 @@ const props = defineProps({
   }
 })
 
-/* 莫兰迪低饱和配色 */
 const colors = [
-  "#46647A", // 灰蓝
-  "#738290", // 蓝灰
-  "#A67C7C", // 豆沙粉
-  "#B39283", // 奶茶棕
-  "#76938F", // 鼠尾草绿
-  "#9A8C98", // 灰紫
-  "#C4A484", // 浅驼色
-  "#6B7A8F"  // 雾霾蓝
+  "#2527a5", "#8b5cf6", "#a78bfa",
+  "#818cf8", "#60a5fa", "#38bdf8",
+  "#34d399", "#b5cf8b", "#facc15",
+  "#fb923c", "#f87171", "#f472b6"
 ]
 
 const option = computed(() => ({
   backgroundColor: "transparent",
 
-  title: {
-    text: "评论关键词",
-    left: "center",
-    top: 15,
-    textStyle: {
-      color: "#445566",
-      fontSize: 22,
-      fontWeight: 400,
-      fontFamily:
-        '"PingFang SC","SF Pro Display","Microsoft YaHei",sans-serif'
-    }
-  },
-
   tooltip: {
-    backgroundColor: "rgba(255,255,255,0.9)",
-    borderColor: "#E5E7EB",
+    backgroundColor: "#fff",
+    borderColor: "#e5e7eb",
     borderWidth: 1,
-    textStyle: {
-      color: "#4B5563"
-    },
-    formatter: params => {
-      return `
-        <div>
-          <strong>${params.name}</strong><br/>
-          出现次数：${params.value}
-        </div>
-      `
-    }
+    textStyle: { color: "#4b5563" },
+    formatter: params => `
+      <div style="padding:4px 8px">
+        <strong>${params.name}</strong><br/>
+        出现次数：${params.value}
+      </div>
+    `
   },
 
   series: [
     {
       type: "wordCloud",
-
       shape: "circle",
-
       left: "center",
-      top: 60,
-
-      width: "90%",
-      height: "80%",
-
-      /* 整体缩小 */
-      sizeRange: [16, 45],
-
-      /* 水平排列 */
+      top: 2,
+      width: "98%",
+      height: "96%",
+      sizeRange: [20, 72],
       rotationRange: [0, 0],
-
       rotationStep: 0,
-
-      /* 词语间距 */
-      gridSize: 8,
-
+      gridSize: 2,
       drawOutOfBound: false,
 
       textStyle: {
-        fontFamily:
-          '"PingFang SC","SF Pro Display","Microsoft YaHei",sans-serif',
-
-        /* 不加粗 */
+        fontFamily: '"PingFang SC","SF Pro Display","Microsoft YaHei",sans-serif',
         fontWeight: 400,
-
-        color: params => {
-          return colors[
-            params.dataIndex % colors.length
-          ]
-        }
+        color: params => colors[params.dataIndex % colors.length]
       },
 
       emphasis: {
         focus: "self",
-
-        textStyle: {
-          shadowBlur: 8,
-          shadowColor: "rgba(0,0,0,0.12)"
-        }
+        textStyle: { shadowBlur: 8, shadowColor: "rgba(0,0,0,0.12)" }
       },
 
       data: props.keywords.map(item => ({
@@ -122,21 +74,24 @@ const option = computed(() => ({
 
 <style scoped>
 .wordcloud-card {
-  margin-top: 24px;
-  height: 500px;
+  background: rgba(255, 255, 255, 0.72);
+  backdrop-filter: blur(14px);
+  -webkit-backdrop-filter: blur(14px);
+  border: 1px solid rgba(255, 255, 255, 0.7);
   border-radius: 12px;
+  padding: 10px;
+  box-shadow: 0 2px 16px rgba(0,0,0,0.05);
+}
 
-  /* 磨砂玻璃 — 高透明度 */
-  background: rgba(255, 255, 255, 0.18);
-  backdrop-filter: blur(6px);
-  -webkit-backdrop-filter: blur(6px);
-
-  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.06);
-  overflow: hidden;
+.chart-title {
+  font-size: 15px;
+  font-weight: 600;
+  color: #374151;
+  margin: 0 0 4px 0;
 }
 
 .chart {
   width: 100%;
-  height: 100%;
+  height: 460px;
 }
 </style>

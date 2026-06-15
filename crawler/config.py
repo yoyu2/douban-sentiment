@@ -16,7 +16,7 @@ MAX_PAGES = 20
 PAGE_SIZE = 20
 
 # 后端接口
-UPLOAD_URL = "http://127.0.0.1:8000/api/upload"
+UPLOAD_URL = "http://47.113.193.26/api/upload"
 
 
 # 请求头

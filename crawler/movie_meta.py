@@ -62,8 +62,11 @@ def download_poster(movie_name, poster_url):
     filepath = os.path.join(POSTERS_DIR, f"{movie_name}.jpg")
 
     try:
-        # 豆瓣图片 CDN 需要 Referer 头，否则返回 418
-        img_headers = {**HEADERS, "Referer": "https://movie.douban.com/"}
+        # 豆瓣图片 CDN 只需要 Referer，不能带 Cookie（否则触发反爬）
+        img_headers = {
+            "User-Agent": HEADERS["User-Agent"],
+            "Referer": "https://movie.douban.com/",
+        }
         img_response = requests.get(
             poster_url,
             headers=img_headers,
@@ -71,6 +74,11 @@ def download_poster(movie_name, poster_url):
         )
 
         if img_response.status_code == 200:
+            # 检查是否真的下载到了图片（防反爬 JS/HTML）
+            content_type = img_response.headers.get("Content-Type", "")
+            if "image" not in content_type:
+                print(f"  海报下载失败: 返回的不是图片 ({content_type})")
+                return None
             with open(filepath, "wb") as f:
                 f.write(img_response.content)
             print(f"  海报已下载: {filepath}")

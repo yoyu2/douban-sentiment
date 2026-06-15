@@ -30,7 +30,7 @@ from movie_stats import (
     generate_keywords,
     generate_summary
 )
-from movie_meta import fetch_and_save_poster
+from movie_meta import fetch_and_save_poster, load_movie_meta
 
 
 def build_url(movie_id, start):
@@ -178,15 +178,22 @@ def main():
     summary = generate_summary(analyzed)
     save_summary(movie_name=movie_name, data=summary)
 
-    # 上传到后端（后端只落盘，不重复分析）
+    # 读取海报信息（由 crawl 内部 fetch_and_save_poster 保存）
+    meta = load_movie_meta(movie_name) or {}
+    poster_url = meta.get("poster_url")
+
+    # 上传到后端（后端落盘 + 下载海报）
     upload_comments(
         movie_name=movie_name,
         comment_type=comment_type,
         comments=comments,
+        analyzed_comments=analyzed,
         sentiment_stats=sentiment_stats,
         rating_stats=rating_stats,
         keyword_stats=keyword_stats,
         summary=summary,
+        poster_url=poster_url,
+        movie_id=movie_id,
     )
 
 

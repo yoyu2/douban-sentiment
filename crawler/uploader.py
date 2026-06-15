@@ -12,6 +12,8 @@ def upload_comments(
     rating_stats=None,
     keyword_stats=None,
     summary=None,
+    poster_url=None,
+    movie_id=None,
 ):
 
     data = {
@@ -23,6 +25,8 @@ def upload_comments(
         "rating_stats": rating_stats,
         "keyword_stats": keyword_stats,
         "summary": summary,
+        "poster_url": poster_url,
+        "movie_id": movie_id,
     }
 
     try:

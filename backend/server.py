@@ -19,7 +19,7 @@ from crawler.storage import (
     save_rating_distribution,
     save_summary,
 )
-from crawler.movie_meta import load_movie_meta
+from crawler.movie_meta import load_movie_meta, save_movie_meta, download_poster
 
 app = Sanic("douban-sentiment")
 CORS(app)
@@ -197,6 +197,17 @@ async def upload(request):
 
     if data.get("summary"):
         save_summary(movie_name, data["summary"])
+
+    # 处理海报和元数据
+    poster_url = data.get("poster_url")
+    movie_id = data.get("movie_id")
+    if poster_url or movie_id:
+        try:
+            save_movie_meta(movie_name, movie_id, poster_url)
+            if poster_url:
+                download_poster(movie_name, poster_url)
+        except Exception as e:
+            print(f"  海报/元数据处理失败: {e}")
 
     return json_response({
         "status": "success",

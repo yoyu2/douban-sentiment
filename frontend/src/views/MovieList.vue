@@ -1,9 +1,10 @@
 <script setup>
-import { ref, onMounted } from "vue"
+import { ref, computed, onMounted } from "vue"
 import { useRouter } from "vue-router"
 import { getMovies, API_BASE } from "../api/movie"
 
 const movies = ref([])
+const searchQuery = ref("")
 const router = useRouter()
 
 onMounted(async () => {
@@ -13,6 +14,12 @@ onMounted(async () => {
   movies.value = raw.map(item =>
     typeof item === "string" ? { name: item, poster: null } : item
   )
+})
+
+const filteredMovies = computed(() => {
+  const q = searchQuery.value.trim().toLowerCase()
+  if (!q) return movies.value
+  return movies.value.filter(m => m.name.toLowerCase().includes(q))
 })
 
 function openMovie(movieName) {
@@ -33,13 +40,38 @@ function posterUrl(movie) {
       <h1 class="hero-title">豆瓣影评情感分析平台</h1>
     </header>
 
+    <!-- 搜索框 -->
+    <div v-if="movies.length > 0" class="search-section">
+      <div class="search-wrapper">
+        <span class="search-icon">🔍</span>
+        <input
+          v-model="searchQuery"
+          type="text"
+          class="search-input"
+          placeholder="搜索影片名称…"
+        />
+        <button
+          v-if="searchQuery"
+          class="search-clear"
+          @click="searchQuery = ''"
+          title="清除搜索"
+        >
+          ✕
+        </button>
+      </div>
+    </div>
+
     <div v-if="movies.length === 0" class="empty-state">
       <span>暂无影片数据，请先运行爬虫抓取影评</span>
     </div>
 
+    <div v-else-if="filteredMovies.length === 0" class="empty-state">
+      <span>没有找到匹配「{{ searchQuery }}」的影片</span>
+    </div>
+
     <div v-else class="movie-grid">
       <div
-        v-for="movie in movies"
+        v-for="movie in filteredMovies"
         :key="movie.name"
         class="movie-card"
         @click="openMovie(movie.name)"
@@ -100,6 +132,72 @@ function posterUrl(movie) {
   background-clip: text;
   margin: 0;
   line-height: 1.3;
+}
+
+/* ========== 搜索框 ========== */
+.search-section {
+  display: flex;
+  justify-content: center;
+  padding: 0 0 28px;
+}
+
+.search-wrapper {
+  position: relative;
+  width: 100%;
+  max-width: 420px;
+}
+
+.search-icon {
+  position: absolute;
+  left: 14px;
+  top: 50%;
+  transform: translateY(-50%);
+  font-size: 16px;
+  pointer-events: none;
+  opacity: 0.5;
+}
+
+.search-input {
+  width: 100%;
+  padding: 12px 40px 12px 42px;
+  border: 2px solid #e5e7eb;
+  border-radius: 12px;
+  font-size: 15px;
+  color: #374151;
+  background: #fff;
+  outline: none;
+  transition: border-color 0.2s, box-shadow 0.2s;
+  box-sizing: border-box;
+}
+
+.search-input::placeholder {
+  color: #9ca3af;
+}
+
+.search-input:focus {
+  border-color: #6366f1;
+  box-shadow: 0 0 0 3px rgba(99, 102, 241, 0.12);
+}
+
+.search-clear {
+  position: absolute;
+  right: 10px;
+  top: 50%;
+  transform: translateY(-50%);
+  background: none;
+  border: none;
+  font-size: 16px;
+  color: #9ca3af;
+  cursor: pointer;
+  padding: 4px 8px;
+  border-radius: 50%;
+  line-height: 1;
+  transition: color 0.15s, background 0.15s;
+}
+
+.search-clear:hover {
+  color: #374151;
+  background: #f3f4f6;
 }
 
 /* ========== 空状态 ========== */

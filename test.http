@@ -1,0 +1,20 @@
+GET http://127.0.0.1:8000/test
+###
+GET http://127.0.0.1:8000/api/movies
+###
+GET http://127.0.0.1:8000/api/movies/霸别姬/statistics
+###
+GET http://127.0.0.1:8000/api/movies/霸王姬/comments
+###
+GET http://127.0.0.1:8000/api/posters/霸王姬
+###
+POST http://127.0.0.1:8000/api/upload
+Content-Type: application/json
+
+{
+    "movie_name":"test",
+    "comment_type":"latest",
+    "comments":["nih"]
+}
+###
+GET http://127.0.0.1:8000/api/movies/search

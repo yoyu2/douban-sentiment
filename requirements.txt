@@ -2,4 +2,6 @@ requests>=2.28
 beautifulsoup4>=4.11
 jieba>=0.42
 sanic>=23.3
+sanic-cors>=2.2
 openai>=1.0
+snownlp>=0.12

@@ -23,6 +23,7 @@ from storage import (
     save_summary
 )
 from backend.llm_service import analyze_sentiment
+from sentiment import analyze_comments, analyze_comments_with_snownlp
 from movie_stats import (
     generate_sentiment_statistics,
     generate_rating_distribution,
@@ -40,14 +41,35 @@ def build_url(movie_id, start):
     )
 
 
-def crawl(movie_name, movie_id, comment_type="latest"):
-    """爬取指定影片的评论，完成清洗和情感分析"""
+def crawl(movie_name, movie_id, comment_type="latest", analysis_mode="llm"):
+    """
+    爬取指定影片的评论，完成清洗和情感分析。
+
+    analysis_mode:
+        "llm"     — 调用大模型精准分析（慢，准确度高）
+        "snownlp" — snownlp 模型分析（较快，准确度较高，离线可用）
+        "local"   — 本地关键词匹配快速分析（最快，准确度较低）
+    """
     all_comments = []
     all_analyzed = []
 
     failed_pages = 0
 
+    total_pages = MAX_PAGES
     for page in range(MAX_PAGES):
+
+        # 显示进度
+        progress_pct = (page + 1) / total_pages * 100
+        bar_len = 30
+        filled = int(bar_len * (page + 1) / total_pages)
+        bar = "█" * filled + "░" * (bar_len - filled)
+        print(
+            f"\r  进度: [{bar}] {page + 1}/{total_pages} 页 "
+            f"({progress_pct:.0f}%)  "
+            f"已获取 {len(all_comments)} 条",
+            end="",
+            flush=True,
+        )
 
         start = page * PAGE_SIZE
 
@@ -68,14 +90,19 @@ def crawl(movie_name, movie_id, comment_type="latest"):
             comments=comments
         )
 
-        # 使用大模型进行情感分析
-        analyzed_comments = []
-        for comment in comments:
-            sentiment_result = analyze_sentiment(comment["content"])
-            analyzed_comments.append({
-                **comment,
-                "sentiment": sentiment_result
-            })
+        # 根据模式选择情感分析方式
+        if analysis_mode == "local":
+            analyzed_comments = analyze_comments(comments)
+        elif analysis_mode == "snownlp":
+            analyzed_comments = analyze_comments_with_snownlp(comments)
+        else:
+            analyzed_comments = []
+            for comment in comments:
+                sentiment_result = analyze_sentiment(comment["content"])
+                analyzed_comments.append({
+                    **comment,
+                    "sentiment": sentiment_result
+                })
 
         save_analysis(
             movie_name=movie_name,
@@ -88,6 +115,8 @@ def crawl(movie_name, movie_id, comment_type="latest"):
 
         # 防止请求太快
         time.sleep(2)
+
+    print()  # 进度行换行
 
     print(f"爬取完成：{len(all_comments)} 条评论（{MAX_PAGES} 页，{failed_pages} 页失败）")
 
@@ -117,7 +146,20 @@ def main():
     if comment_type not in ("hot", "latest"):
         comment_type = "latest"
 
-    comments, analyzed = crawl(movie_name, movie_id, comment_type)
+    print()
+    print("情感分析模式：")
+    print("  [1] 大模型精准分析（慢，准确度高，需联网）")
+    print("  [2] snownlp 模型分析（较快，准确度较高，离线可用）")
+    print("  [3] 本地词典快速分析（最快，准确度较低，离线可用）")
+    mode_choice = input("请选择 (1/2/3, 默认 1): ").strip()
+    if mode_choice == "3":
+        analysis_mode = "local"
+    elif mode_choice == "2":
+        analysis_mode = "snownlp"
+    else:
+        analysis_mode = "llm"
+
+    comments, analyzed = crawl(movie_name, movie_id, comment_type, analysis_mode)
 
     if not comments:
         print("没有获取到评论")

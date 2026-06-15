@@ -10,7 +10,7 @@ BASE_URL = (
 )
 
 # 爬取页数
-MAX_PAGES = 100
+MAX_PAGES = 20
 
 # 每页20条
 PAGE_SIZE = 20

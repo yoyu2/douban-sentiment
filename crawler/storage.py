@@ -43,7 +43,7 @@ def save_cleaned(
             indent=2
         )
 
-    print(f"cleaned 数据已保存: {filepath}")
+    # 静默保存，进度由 crawler 统一显示
 
 
 # =========================
@@ -78,7 +78,7 @@ def save_analysis(
             indent=2
         )
 
-    print(f"analysis 数据已保存: {filepath}")
+    # 静默保存，进度由 crawler 统一显示
 
 
 # =========================

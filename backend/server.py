@@ -60,6 +60,26 @@ async def list_movies(request):
     return json_response({"movies": movies})
 
 
+@app.get("/api/movies/search")
+async def search_movies(request):
+    """根据关键词搜索影片"""
+    q = request.args.get("q", "").strip()
+    if not q:
+        return json_response({"movies": []})
+
+    stats_dir = os.path.join(DATA_DIR, "statistics")
+    results = []
+    if os.path.exists(stats_dir):
+        for name in sorted(os.listdir(stats_dir)):
+            if q.lower() in name.lower():
+                meta = load_movie_meta(name)
+                results.append({
+                    "name": name,
+                    "poster": f"/api/posters/{name}" if meta and meta.get("poster_url") else None,
+                })
+    return json_response({"movies": results})
+
+
 @app.get("/api/movies/<movie_name>/statistics")
 async def get_statistics(request, movie_name):
     """返回影片完整统计数据"""
@@ -143,9 +163,18 @@ async def upload(request):
 
     if not data:
         return json_response({"error": "invalid data"}, status=400)
-
-    movie_name = data.get("movie_name", "unknown")
+    movie_name = data.get("movie_name")
+    if not movie_name:
+        return json_response(
+            {"error": "movie_name is required"},
+            status=400
+        )
     comment_type = data.get("comment_type", "latest")
+    if not comment_type:
+        return json_response(
+            {"error": "comment_type is required"},
+            status=400
+        )
     comments = data.get("comments", [])
 
     if not comments:

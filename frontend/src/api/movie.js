@@ -9,6 +9,9 @@ const api = axios.create({
 export function getMovies() {
     return api.get("/api/movies")
 }
+export function searchMovies(query) {
+    return api.get("/api/movies/search", { params: { q: query } })
+}
 export function getMovieStatistics(movieName) {
     return api.get(`/api/movies/${movieName}/statistics`)
 }

@@ -201,10 +201,21 @@ async def upload(request):
     # 处理海报和元数据
     poster_url = data.get("poster_url")
     movie_id = data.get("movie_id")
+    poster_base64 = data.get("poster_base64")
     if poster_url or movie_id:
         try:
             save_movie_meta(movie_name, movie_id, poster_url)
-            if poster_url:
+            if poster_base64:
+                # 优先使用客户端传输的海报文件，无需 ECS 重复下载
+                import base64
+                poster_dir = os.path.join(DATA_DIR, "posters")
+                os.makedirs(poster_dir, exist_ok=True)
+                poster_path = os.path.join(poster_dir, f"{movie_name}.jpg")
+                with open(poster_path, "wb") as f:
+                    f.write(base64.b64decode(poster_base64))
+                print(f"  海报已保存: {poster_path}")
+            elif poster_url:
+                # fallback: 本地没有海报文件时，从豆瓣下载
                 download_poster(movie_name, poster_url)
         except Exception as e:
             print(f"  海报/元数据处理失败: {e}")

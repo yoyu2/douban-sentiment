@@ -181,8 +181,9 @@ def main():
     # 读取海报信息（由 crawl 内部 fetch_and_save_poster 保存）
     meta = load_movie_meta(movie_name) or {}
     poster_url = meta.get("poster_url")
+    poster_path = meta.get("poster_local")
 
-    # 上传到后端（后端落盘 + 下载海报）
+    # 上传到后端（海报文件直接 base64 传输，ECS 端无需重复下载豆瓣 CDN）
     upload_comments(
         movie_name=movie_name,
         comment_type=comment_type,
@@ -194,6 +195,7 @@ def main():
         summary=summary,
         poster_url=poster_url,
         movie_id=movie_id,
+        poster_path=poster_path,
     )
 
 

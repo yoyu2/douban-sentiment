@@ -203,6 +203,7 @@ def generate_summary(comments):
         }
 
     total_rating = 0
+    rated_count = 0  # 实际有评分的评论数（未知评分不计入）
 
     positive = 0
     negative = 0
@@ -210,10 +211,10 @@ def generate_summary(comments):
 
     for comment in comments:
 
-        total_rating += comment.get(
-            "rating",
-            0
-        )
+        rating = comment.get("rating")
+        if rating is not None:
+            total_rating += rating
+            rated_count += 1
 
         sentiment = comment.get(
             "sentiment",
@@ -230,9 +231,9 @@ def generate_summary(comments):
             neutral += 1
 
     average_rating = round(
-        total_rating / total,
+        total_rating / rated_count,
         2
-    )
+    ) if rated_count else 0
 
     sentiment_map = {
         "positive": positive,

@@ -1,10 +1,5 @@
 #!/bin/bash
 set -e
-
-# =========================
-# 同步到阿里云 ECS 脚本
-# =========================
-
 ECS_IP="47.113.193.26"
 ECS_USER="root"
 ECS_PATH="/opt/douban-sentiment-project"

@@ -49,7 +49,7 @@ def clean_comment(comment):
         "allstar50": 5
     }
 
-    rating = rating_map.get(rating, 0)
+    rating = rating_map.get(rating, None)  # 未知评分 → None，避免被当成 0 分拉低统计
 
     return {
         "content": content,

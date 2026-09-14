@@ -131,6 +131,15 @@ dmypy.json
 # Pyre type checker
 .pyre/
 
+# =========================
+# 项目本地配置与数据（勿提交）
+# =========================
+.env
+data/
+.claude/
+frontend/.agents/
+frontend/skills-lock.json
+
 # pytype static type analyzer
 .pytype/
 

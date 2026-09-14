@@ -156,9 +156,6 @@ async def get_comments(request, movie_name):
 
 @app.post("/api/upload")
 async def upload(request):
-    """
-    接收爬虫上传的完整数据包，只落盘不重复分析
-    """
     data = request.json
 
     if not data:

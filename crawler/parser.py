@@ -16,8 +16,7 @@ def parse_comments(html):
         time_tag = item.find("span", class_="comment-time")
 
         # 评分
-        rating_tag = item.find("span", class_=lambda x:
-                               x and "rating" in x)
+        rating_tag = item.find("span", class_=lambda x: bool(x and "rating" in x))
 
         content = (
             content_tag.get_text(strip=True)

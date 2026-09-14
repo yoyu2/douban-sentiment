@@ -74,7 +74,11 @@ def analyze_sentiment(text):
         temperature=0.1,
     )
 
-    result = response.choices[0].message.content.strip().lower()
+    content = response.choices[0].message.content
+    if not content :
+        print("⚠ 模型没有返回内容，按 neutral 处理")
+        return "neutral"
+    result=content.strip().lower()
 
     if result not in ("positive", "negative", "neutral"):
         print(f"  ⚠ 模型返回非预期结果: {result!r}，按 neutral 处理")
